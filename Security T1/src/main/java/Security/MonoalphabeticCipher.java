@@ -13,7 +13,11 @@ public class MonoalphabeticCipher {
         // Students should complete this loop
         for (int i = 0; i < alphabet.length(); i++) {
             // encryptionMap // Hint: Map plaintext letter to cipher letter
+            encryptionMap.put(alphabet.charAt(i), key.charAt(i));
         }
+        encryptionMap.put(' ', ' ');
+        System.out.println(encryptionMap);
+
         return encryptionMap;
     }
 
@@ -26,7 +30,11 @@ public class MonoalphabeticCipher {
         // Students should complete this loop
         for (int i = 0; i < alphabet.length(); i++) {
             // decryptionMap // Hint: Reverse mapping
+            decryptionMap.put(key.charAt(i), alphabet.charAt(i));
         }
+        decryptionMap.put(' ', ' ');
+        System.out.println(decryptionMap);
+
         return decryptionMap;
     }
 
@@ -37,7 +45,9 @@ public class MonoalphabeticCipher {
 
         for (char c : plaintext.toCharArray()) {
             // TODO: Use the encryption map to convert each letter
+            encryptedText.append(encryptionMap.get(c));
         }
+        System.out.println(encryptedText);
         return encryptedText.toString();
     }
 
@@ -48,7 +58,7 @@ public class MonoalphabeticCipher {
 
         for (char c : ciphertext.toCharArray()) {
             // TODO: Use the decryption map to convert each letter
-
+            decryptedText.append(decryptionMap.get(c));
         }
         return decryptedText.toString();
     }
@@ -68,7 +78,8 @@ public class MonoalphabeticCipher {
             if (Character.isLetter(plainChar)) {
                 int index = alphabet.indexOf(plainChar);
                 // TODO: Ensure each letter is mapped only once
-
+                if (keyMap[index] == ' ')
+                    keyMap[index] = cipherChar;
             }
         }
 
