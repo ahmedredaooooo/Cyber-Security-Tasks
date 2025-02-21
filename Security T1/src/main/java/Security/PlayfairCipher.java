@@ -56,6 +56,13 @@ public class PlayfairCipher {
     // TODO: Implement this method to find the position of a character in the key matrix
     private int[] findPosition(char c) {
         // Students should complete this part
+        for (int i = 0; i < keyMatrix.length; i++) {
+            for (int j = 0; j < keyMatrix[i].length; j++) {
+                if (keyMatrix[i][j] == c) {
+                    return new int[]{i, j};
+                }
+            }
+        }
         return null;
     }
 
@@ -81,12 +88,41 @@ public class PlayfairCipher {
                 encryptedText.append(keyMatrix[pos2[0]][pos1[1]]);
             }
         }
+        System.out.println(encryptedText);
         return encryptedText.toString();
     }
-
+    private void printKeyMatrix(char[][] keyMatrix)
+    {
+        for (int i = 0; i < keyMatrix.length; i++) {
+            for (int j = 0; j < keyMatrix[i].length; j++) {
+                System.out.print(keyMatrix[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
     // TODO: Implement this method to decrypt the ciphertext back to plaintext
     public String decrypt(String text) {
         // Students should complete this part
-        return null;
+//        System.out.println(text);
+        text = prepareText(text);
+//        System.out.println(text);
+//        printKeyMatrix(keyMatrix);
+        StringBuilder decryptedText = new StringBuilder();
+        for (int i = 0; i < text.length(); i += 2) {
+            int[] pos1 = findPosition(text.charAt(i));
+            int[] pos2 = findPosition(text.charAt(i + 1));
+            if (pos1 == null || pos2 == null) continue;
+            if (pos1[0] == pos2[0]) {
+                decryptedText.append(keyMatrix[pos1[0]][(pos1[1] - 1 + 5) % 5]);
+                decryptedText.append(keyMatrix[pos2[0]][(pos2[1] - 1 + 5) % 5]);
+            } else if (pos1[1] == pos2[1]) {
+                decryptedText.append(keyMatrix[(pos1[0] - 1 + 5) % 5][pos1[1]]);
+                decryptedText.append(keyMatrix[(pos2[0] - 1 + 5) % 5][pos2[1]]);
+            } else {
+                decryptedText.append(keyMatrix[pos1[0]][pos2[1]]);
+                decryptedText.append(keyMatrix[pos2[0]][pos1[1]]);
+            }
+        }
+        return decryptedText.toString().replace("X", "");
     }
 }
