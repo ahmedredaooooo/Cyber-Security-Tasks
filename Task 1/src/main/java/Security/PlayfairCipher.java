@@ -1,8 +1,11 @@
 package Security;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class PlayfairCipher {
     private final char[][] keyMatrix;
@@ -53,17 +56,15 @@ public class PlayfairCipher {
         return sb.toString();
     }
 
+    private int[][] memo = new int[26][];
     // TODO: Implement this method to find the position of a character in the key matrix
     private int[] findPosition(char c) {
         // Students should complete this part
-        for (int i = 0; i < keyMatrix.length; i++) {
-            for (int j = 0; j < keyMatrix[i].length; j++) {
-                if (keyMatrix[i][j] == c) {
-                    return new int[]{i, j};
-                }
-            }
-        }
-        return null;
+        if (memo[c - 'A'] != null) return memo[c - 'A'];
+        for (int i = 0; i < keyMatrix.length; i++)
+            for (int j = 0; j < keyMatrix[i].length; j++)
+                memo[keyMatrix[i][j] - 'A'] = new int[]{i, j};
+        return memo[c - 'A'];
     }
 
     // Encrypts the given plaintext using the Playfair cipher algorithm
@@ -88,41 +89,40 @@ public class PlayfairCipher {
                 encryptedText.append(keyMatrix[pos2[0]][pos1[1]]);
             }
         }
-        System.out.println(encryptedText);
         return encryptedText.toString();
     }
-    private void printKeyMatrix(char[][] keyMatrix)
-    {
-        for (int i = 0; i < keyMatrix.length; i++) {
-            for (int j = 0; j < keyMatrix[i].length; j++) {
-                System.out.print(keyMatrix[i][j] + " ");
-            }
-            System.out.println();
-        }
-    }
+
     // TODO: Implement this method to decrypt the ciphertext back to plaintext
     public String decrypt(String text) {
         // Students should complete this part
-//        System.out.println(text);
-        text = prepareText(text);
-//        System.out.println(text);
-//        printKeyMatrix(keyMatrix);
         StringBuilder decryptedText = new StringBuilder();
-        for (int i = 0; i < text.length(); i += 2) {
-            int[] pos1 = findPosition(text.charAt(i));
-            int[] pos2 = findPosition(text.charAt(i + 1));
-            if (pos1 == null || pos2 == null) continue;
-            if (pos1[0] == pos2[0]) {
-                decryptedText.append(keyMatrix[pos1[0]][(pos1[1] - 1 + 5) % 5]);
-                decryptedText.append(keyMatrix[pos2[0]][(pos2[1] - 1 + 5) % 5]);
-            } else if (pos1[1] == pos2[1]) {
-                decryptedText.append(keyMatrix[(pos1[0] - 1 + 5) % 5][pos1[1]]);
-                decryptedText.append(keyMatrix[(pos2[0] - 1 + 5) % 5][pos2[1]]);
-            } else {
-                decryptedText.append(keyMatrix[pos1[0]][pos2[1]]);
-                decryptedText.append(keyMatrix[pos2[0]][pos1[1]]);
-            }
+
+        if (text.length() % 2 == 1)
+            text = text.replaceAll("[A-Z]$", "");
+        assert(text.length() % 2 == 0);
+        for (int i = 0; i < text.length(); i += 2)
+        {
+             int[] p1 = findPosition(text.charAt(i));
+             int[] p2 = findPosition(text.charAt(i + 1));
+             assert(!Arrays.equals(p1, p2));
+             if (p1[0] == p2[0])
+             {
+                 decryptedText.append(keyMatrix[p1[0]][(p1[1] + 4) % 5]);
+                 decryptedText.append(keyMatrix[p2[0]][(p2[1] + 4) % 5]);
+             }
+             else if (p1[1] == p2[1])
+             {
+                 decryptedText.append(keyMatrix[(p1[0] + 4) % 5][p1[1]]);
+                 decryptedText.append(keyMatrix[(p2[0] + 4) % 5][p2[1]]);
+             }
+             else
+             {
+                 decryptedText.append(keyMatrix[p1[0]][p2[1]]);
+                 decryptedText.append(keyMatrix[p2[0]][p1[1]]);
+             }
         }
-        return decryptedText.toString().replace("X", "");
+        text = decryptedText.toString().toUpperCase().replaceAll("([A-Z])X\\1", "$1$1").replaceAll("X$", "").replace('J', 'I');
+
+        return text;
     }
 }
