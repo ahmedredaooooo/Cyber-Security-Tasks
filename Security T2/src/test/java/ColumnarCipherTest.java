@@ -83,4 +83,9 @@ public class ColumnarCipherTest {
         List<Integer> key = List.of(1, 2, 3);
         assertEquals("", cipher.decrypt("", key), "Decryption of an empty string should return an empty string.");
     }
+
+    @Test
+    void UT() {
+
+    }
 }

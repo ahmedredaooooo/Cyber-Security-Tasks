@@ -27,7 +27,7 @@ public class DES {
 
     private static final int[] PC2 = {14, 17, 11, 24, 1, 5, 3, 28, 15, 6, 21, 10, 23, 19, 12, 4, 26, 8, 16, 7, 27, 20, 13, 2, 41, 52, 31, 37, 47, 55, 30, 40, 51, 45, 33, 48, 44, 49, 39, 56, 34, 53, 46, 42, 50, 36, 29, 32};
 
-    private static String hexToBinary(String hex) {
+    public static String hexToBinary(String hex) {
         // Convert the hex string to a BigInteger
         BigInteger bigInt = new BigInteger(hex, 16);
 
@@ -44,9 +44,15 @@ public class DES {
 
 
     // Converts a binary string to a hex string
-    private static String binaryToHex(String binary) {
+    public static String binaryToHex(String binary) { //raga3ha private
         // TODO: Implement this method to convert a binary string to a hexadecimal string.
-        return null; // Placeholder return statement
+
+        String hex = new BigInteger(binary, 2).toString(16);
+
+        while (hex.length() < 16)
+            hex = "0" + hex;
+
+        return hex; // Placeholder return statement
     }
 
     // Generic permutation function
@@ -113,29 +119,45 @@ public class DES {
     }
 
     // Performs bitwise XOR on two binary strings of equal length
-    private String xor(String a, String b) {
+    public String xor(String a, String b) { // raga3ha private
         // TODO: Implement bitwise XOR between strings 'a' and 'b'.
-
         if (a.length() != b.length()) {
             throw new IllegalArgumentException("Strings must be of equal length for XOR operation.");
         }
-
-        return null; // Placeholder return
+        String res = (new BigInteger(a, 2).xor(new BigInteger(b, 2))).toString(2); // Placeholder return
+        while (res.length() < a.length())
+            res = "0" + res;
+        return res;
     }
 
     // Generate the subkeys (PC-1, shifts, PC-2)
-    private static String[] generateSubKeys(String keyBin) {
+    public static String[] generateSubKeys(String keyBin) {
         String[] subkeys = new String[16];
-
         // TODO: Apply PC-1 to the 64-bit key to get a 56-bit key
-
+        StringBuilder key56Builder = new StringBuilder();
+        for(int i = 0 ; i < 56; i++)
+            key56Builder.append(keyBin.charAt(PC1[i] - 1)) ;
+        String key56 = key56Builder.toString();
         // TODO: Split the 56-bit key into two halves
-
+        StringBuilder L = new StringBuilder(key56.substring(0, 28));
+        StringBuilder R = new StringBuilder(key56.substring(28, 56));
         // TODO: Generate 16 subkeys by shifting and applying PC-2
         for (int i = 0; i < 16; i++) {
+            for (int c = 0; c < SHIFTS[i]; c++)
+            {
+                L.append(L.charAt(0));
+                L.deleteCharAt(0);
+                R.append(R.charAt(0));
+                R.deleteCharAt(0);
+            }
+            key56Builder = new StringBuilder(L);
+            key56Builder.append(R);
 
+            StringBuilder key48Builder = new StringBuilder();
+            for (int j = 0; j < 48; ++j)
+                key48Builder.append(key56Builder.charAt(PC2[j] - 1));
+            subkeys[i] = key48Builder.toString();
         }
-
         return subkeys;
     }
 
@@ -143,17 +165,28 @@ public class DES {
     // Feistel function
     private String feistel(String R, String subKey) {
         // TODO: Expand R to 48 bits using E-table
-
+        R = permute(R, E);
         // TODO: XOR the expanded R with the subkey
-
+        R = xor(R, subKey);
         // TODO: Divide the xored result into 8 blocks and apply S-box substitution
-        StringBuilder substituted = new StringBuilder();
+        String[] blocks = new String[8];
+        for (int i = 0; i < 8; i++)
+            blocks[i] = R.substring(i * 6, (i + 1) * 6);
+
+        StringBuilder substituted = new StringBuilder(); //32bit
         for (int i = 0; i < 8; i++) {
+            int row = Integer.parseInt("" + blocks[i].charAt(0) + blocks[i].charAt(5), 2);
+            int col = Integer.parseInt(blocks[i].substring(1, 5), 2);
+            String SboxCell = Integer.toBinaryString(SBOXES[i][row][col]);
+            while (SboxCell.length() < 4)
+                SboxCell = "0" + SboxCell;
+            substituted.append(SboxCell);
         }
 
         // TODO: Apply permutation P to the substituted output
 
-        return null;
+
+        return permute(substituted.toString(), P);
     }
 
 }

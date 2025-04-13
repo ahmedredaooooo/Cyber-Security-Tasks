@@ -5,8 +5,55 @@ public class ColumnarCipher {
 
     public List<Integer> analyse(String plainText, String cipherText) {
         // TODO: Analyze the plainText and cipherText to determine the key(s)
+        int ptSize = plainText.length();
+        int ctSize = cipherText.length();
+        int[] freq = new int[ptSize];
+        int[] mx = {-1, -1};
 
-        return new ArrayList<>(); // Placeholder return
+        for (int i = 1; i < ctSize; ++i)
+        {
+            char f = cipherText.charAt(i - 1);
+            char s = cipherText.charAt(i);
+            int cols = plainText.indexOf(s) - plainText.indexOf(f);
+            if (cols < 0) continue;
+            freq[cols]++;
+            if (freq[cols] > mx[1])
+            {
+                mx[0] = cols;
+                mx[1] = freq[cols];
+            }
+        }
+        int cols = mx[0];
+        int rows = ctSize / cols;
+
+        int count = 0;
+        StringBuilder[] col = new StringBuilder[cols];
+
+        for (int i = 0; i < cols; i++)
+            col[i] = new StringBuilder();
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                if (count >= ptSize)
+                    col[j].append('x');
+                else
+                    col[j].append(plainText.charAt(count++));
+
+        ArrayList<Integer> Key = new ArrayList<Integer>(cols);
+        for (int i = 0; i < cols; i++)
+            Key.add(0);
+        for (int i = 0; i < cols; ++i)
+        {
+            String tmp = cipherText.substring(i * rows, i * rows + rows);
+            for (int j = 0; j < cols; j++)
+                if (tmp.equals(col[j].toString()))
+                {
+                    Key.set(j, i + 1);
+                    break;
+                }
+        }
+
+        return Key; // Placeholder return
     }
 
     public String decrypt(String cipherText, List<Integer> key) {
@@ -21,16 +68,16 @@ public class ColumnarCipher {
         }
 
         int remainingCols = cipherSize % key.size();
-        for (int i = 0; i < key.size(); i++) {
-            for (int j = 0; j < rows; j++) {
+        for (int i = 0; i < key.size(); ++i) {
+            for (int j = 0; j < rows; ++j) {
                 if (remainingCols != 0 && j == rows - 1 && keyMap.get(i) >= remainingCols) continue;
                 grid[j][keyMap.get(i)] = cipherText.charAt(count++);
             }
         }
 
         StringBuilder result = new StringBuilder();
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < key.size(); j++) {
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < key.size(); ++j) {
                 result.append(grid[i][j]);
             }
         }
