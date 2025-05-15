@@ -36,3 +36,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+Security T1/.idea/
+Security T2/.idea/
+Security T3/.idea/
