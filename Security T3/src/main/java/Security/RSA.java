@@ -2,7 +2,7 @@ package Security;
 
 public class RSA {
 
-    public int eGCD(long A1 , long A2, long A3 , long B1, long B2, long B3) {
+    public static int eGCD(long A1 , long A2, long A3 , long B1, long B2, long B3) {
         if (B3 == 1) {
             return (int)B2;
         } else if (B3 == 0) {
@@ -11,7 +11,7 @@ public class RSA {
         long Q = A3 / B3;
         return eGCD(B1, B2, B3, (A1 - Q * B1), (A2 - Q * B2), (A3 % B3));
     }
-    public int fastPower(long b, int p, int mod)
+    public static int fastPower(long b, int p, int mod)
     {
         long ret = 1;
         if (p == 0) return 1;
@@ -40,7 +40,7 @@ public class RSA {
         int d = eGCD(1, 0, phi, 0 , 1, e);
         if (d < 0)
         {
-            d %= phi;
+//            d %= phi;
             d += phi;
         }
         return fastPower(C, d,  p * q);
